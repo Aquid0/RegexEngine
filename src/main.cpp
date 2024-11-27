@@ -11,5 +11,6 @@ int main() {
 
 
     FiniteAutomata x(s, a, t_f, i_s, a_s);
+    // x.process("hello");
 
 }
