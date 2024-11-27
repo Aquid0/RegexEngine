@@ -19,7 +19,7 @@ class FiniteAutomata {
         int init_state;
         vector<int> accept_states;
  
-        FiniteAutomata(vector<int>, vector<char>, vector<unordered_map<char, vector<int>>>, int, vector<int>);
+        FiniteAutomata(vector<int> s, vector<char> a, vector<unordered_map<char, vector<int>>> t_f, int i_s, vector<int> a_s);
         bool process(string);
 
     private:
