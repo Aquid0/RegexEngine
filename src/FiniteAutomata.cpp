@@ -15,7 +15,7 @@ class FiniteAutomata {
         int init_state; 
         vector<int> accept_states;
 
- 
+
         FiniteAutomata(vector<int> s, vector<char> a, vector<unordered_map<char, vector<int>>> t_f, int i, vector<int> a_s) {
             /*
                 States = {0, 1, 2}
