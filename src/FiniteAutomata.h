@@ -25,7 +25,12 @@ class FiniteAutomata {
     private:
         void convert_to_dfa(); 
         void print_table(vector<vector<set<int>>>& table);
+        void print_tf(vector<unordered_map<char, set<int>>>& data);
         bool check_states(vector<vector<set<int>>> table, set<int> state);
+        int find_index(vector<set<int>> c, set<int> t);
+        bool is_dfa();
+        bool intersects(set<int> s, vector<int> v);
+
 };
 
 #endif
