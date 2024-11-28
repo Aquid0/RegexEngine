@@ -15,20 +15,38 @@ FiniteAutomata::FiniteAutomata(vector<int> s, vector<char> a, vector<unordered_m
 
 bool FiniteAutomata::process(string str)
 {
-    convert_to_dfa();
+    if (!is_dfa())
+    {
+        convert_to_dfa();
+    }
 
-    // int curr = init_state;
+    int curr = init_state;
 
-    // for (auto c : str) {
-    //     unordered_map<char, set<int>> available = transition_func[curr];
-    //     if (available.find(c) == available.end()) {
-    //         return false;
-    //     }
-    //     curr = available[c][0]; // Should be a singleton at this point
-    // }
+    for (auto c : str)
+    {
+        unordered_map<char, set<int>> available = transition_func[curr];
+        if (available.find(c) == available.end())
+        {
+            return false;
+        }
+        curr = *available[c].begin();
+    }
 
-    // if (find(accept_states.begin(), accept_states.end(), curr) != accept_states.end()) return true;
+    if (find(accept_states.begin(), accept_states.end(), curr) != accept_states.end())
+        return true;
     return false;
+}
+
+bool FiniteAutomata::is_dfa()
+{
+    for (int s = 0; s < transition_func.size(); s++)
+    {
+        if (transition_func[s].size() != alphabet.size())
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 void FiniteAutomata::convert_to_dfa()
@@ -66,13 +84,12 @@ void FiniteAutomata::convert_to_dfa()
         transition_table[i][0] = epsilon_closures[i];
     }
 
-
     for (int r = 0; r < transition_table.size(); r++)
     {
         set<int> lookup_states = transition_table[r][0];
         for (int c = 1; c < y + 1; c++)
         {
-            char character = alphabet[c-1];
+            char character = alphabet[c - 1];
             for (auto s : lookup_states)
             {
                 // If the character exists for this current state
@@ -88,24 +105,84 @@ void FiniteAutomata::convert_to_dfa()
                 }
             }
 
-            if (!check_states(transition_table, transition_table[r][c])) {
-                vector<set<int>> new_row(y+1);
+            if (!check_states(transition_table, transition_table[r][c]))
+            {
+                vector<set<int>> new_row(y + 1);
                 new_row[0] = transition_table[r][c];
                 transition_table.push_back(new_row);
             }
-
         }
     }
 
+    // print_table(transition_table);
+    // cout << "\n";
 
-    print_table(transition_table);
+    // Converting to transition_function
+    int num_states = transition_table.size();
+    vector<set<int>> conversion_table(num_states);
+    transition_func.clear();
+    transition_func.resize(num_states);
+
+    // Initial state is initial epsilon enclosure
+    // Converting all sets to integers to fit into transition_func
+
+    for (int r = 0; r < num_states; r++)
+    {
+        conversion_table[r] = transition_table[r][0];
+    }
+
+    vector<int> temp_a_s = accept_states;
+    accept_states.clear();
+
+    for (int r = 0; r < num_states; r++)
+    {
+        if (intersects(transition_table[r][0], temp_a_s))
+        {
+            accept_states.push_back(find_index(conversion_table, transition_table[r][0]));
+        }
+    }
+
+    for (int r = 0; r < num_states; r++)
+    {
+        for (int c = 1; c < transition_table[0].size(); c++)
+        {
+            transition_func[r][alphabet[c - 1]] = {find_index(conversion_table, transition_table[r][c])};
+        }
+    }
+
+    // print_tf(transition_func);
 }
 
+bool FiniteAutomata::intersects(set<int> s, vector<int> v)
+{
+    for (int elem : s)
+    {
+        if (find(v.begin(), v.end(), elem) != v.end())
+        {
+            return true;
+        }
+    }
+    return false;
+}
 
-void FiniteAutomata::print_table(vector<vector<set<int>>>& table) {
+int FiniteAutomata::find_index(vector<set<int>> c, set<int> t)
+{
+    for (int i = 0; i < c.size(); i++)
+    {
+        if (c[i] == t)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void FiniteAutomata::print_table(vector<vector<set<int>>> &table)
+{
     // Print column headers
     std::cout << std::setw(10) << "State/Col";
-    for (size_t col = 0; col < table[0].size(); ++col) {
+    for (size_t col = 0; col < table[0].size(); ++col)
+    {
         std::cout << std::setw(10) << "Col " + std::to_string(col);
     }
     std::cout << std::endl;
@@ -113,15 +190,19 @@ void FiniteAutomata::print_table(vector<vector<set<int>>>& table) {
     std::cout << std::string(10 + table[0].size() * 10, '-') << std::endl;
 
     // Print rows with data
-    for (size_t i = 0; i < table.size(); ++i) {
+    for (size_t i = 0; i < table.size(); ++i)
+    {
         std::cout << std::setw(10) << "Row " + std::to_string(i);
-        for (size_t j = 0; j < table[i].size(); ++j) {
+        for (size_t j = 0; j < table[i].size(); ++j)
+        {
             std::cout << std::setw(10) << "{";
 
             // Add elements of the set
-            for (auto it = table[i][j].begin(); it != table[i][j].end(); ++it) {
+            for (auto it = table[i][j].begin(); it != table[i][j].end(); ++it)
+            {
                 std::cout << *it;
-                if (std::next(it) != table[i][j].end()) {
+                if (std::next(it) != table[i][j].end())
+                {
                     std::cout << ",";
                 }
             }
@@ -131,10 +212,26 @@ void FiniteAutomata::print_table(vector<vector<set<int>>>& table) {
     }
 }
 
-bool FiniteAutomata::check_states(vector<vector<set<int>>> table, set<int> state) {
+void FiniteAutomata::print_tf(vector<unordered_map<char, set<int>>> &data)
+{
+    for (int i = 0; i < data.size(); i++)
+    {
+        cout << "State " << i << ": ";
+        for (const auto &p : data[i])
+        {
+            cout << p.first << " : {" << *p.second.begin() << "}, ";
+        }
+        cout << "\n";
+    }
+}
 
-    for (int r = 0; r < table.size(); r++) {
-        if (table[r][0] == state) {
+bool FiniteAutomata::check_states(vector<vector<set<int>>> table, set<int> state)
+{
+
+    for (int r = 0; r < table.size(); r++)
+    {
+        if (table[r][0] == state)
+        {
             return true;
         }
     }
