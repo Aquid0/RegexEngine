@@ -180,35 +180,35 @@ int FiniteAutomata::find_index(vector<set<int>> c, set<int> t)
 void FiniteAutomata::print_table(vector<vector<set<int>>> &table)
 {
     // Print column headers
-    std::cout << std::setw(10) << "State/Col";
+    cout << setw(10) << "State/Col";
     for (size_t col = 0; col < table[0].size(); ++col)
     {
-        std::cout << std::setw(10) << "Col " + std::to_string(col);
+        cout << setw(10) << "Col " + to_string(col);
     }
-    std::cout << std::endl;
+    cout << endl;
 
-    std::cout << std::string(10 + table[0].size() * 10, '-') << std::endl;
+    cout << string(10 + table[0].size() * 10, '-') << endl;
 
     // Print rows with data
     for (size_t i = 0; i < table.size(); ++i)
     {
-        std::cout << std::setw(10) << "Row " + std::to_string(i);
+        cout << setw(10) << "Row " + to_string(i);
         for (size_t j = 0; j < table[i].size(); ++j)
         {
-            std::cout << std::setw(10) << "{";
+            cout << setw(10) << "{";
 
             // Add elements of the set
             for (auto it = table[i][j].begin(); it != table[i][j].end(); ++it)
             {
-                std::cout << *it;
-                if (std::next(it) != table[i][j].end())
+                cout << *it;
+                if (next(it) != table[i][j].end())
                 {
-                    std::cout << ",";
+                    cout << ",";
                 }
             }
-            std::cout << "}";
+            cout << "}";
         }
-        std::cout << std::endl;
+        cout << endl;
     }
 }
 
