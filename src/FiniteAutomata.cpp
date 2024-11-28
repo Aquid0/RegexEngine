@@ -52,7 +52,7 @@ void FiniteAutomata::convert_to_dfa()
     int y = alphabet.size();
     vector<vector<set<int>>> transition_table(x, vector<set<int>>(y + 1));
 
-    // /*
+    //
     //     Transition Table:
     //      0      1    2
     //    states   a    b
