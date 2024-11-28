@@ -15,18 +15,17 @@ class FiniteAutomata {
     public:
         vector<int> states; 
         vector<char> alphabet;
-        vector<unordered_map<char, vector<int>>> transiton_func;
+        vector<unordered_map<char, set<int>>> transition_func;
         int init_state;
         vector<int> accept_states;
  
-        FiniteAutomata(vector<int> s, vector<char> a, vector<unordered_map<char, vector<int>>> t_f, int i_s, vector<int> a_s);
+        FiniteAutomata(vector<int> s, vector<char> a, vector<unordered_map<char, set<int>>> t_f, int i_s, vector<int> a_s);
         bool process(string);
 
     private:
-        unordered_map<pair<int, char>, int> get_transition_tuples();
         void convert_to_dfa(); 
-
-
+        void print_table(vector<vector<set<int>>>& table);
+        bool check_states(vector<vector<set<int>>> table, set<int> state);
 };
 
 #endif

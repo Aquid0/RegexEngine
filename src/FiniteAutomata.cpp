@@ -1,229 +1,142 @@
+#include "FiniteAutomata.h"
 #include <iostream>
 #include <vector>
 #include <unordered_map>
 #include <string>
 #include <algorithm>
 #include <set>
+#include <iomanip>
 
 using namespace std;
 
-class FiniteAutomata {
-    public: 
-        vector<int> states; 
-        vector<char> alphabet; 
-        vector<unordered_map<char, vector<int>>> transition_func; 
-        int init_state; 
-        vector<int> accept_states;
+FiniteAutomata::FiniteAutomata(vector<int> s, vector<char> a, vector<unordered_map<char, set<int>>> t_f, int i, vector<int> a_s) : states(s), alphabet(a), transition_func(t_f), init_state(i), accept_states(a_s)
+{
+}
 
+bool FiniteAutomata::process(string str)
+{
+    convert_to_dfa();
 
-        FiniteAutomata(vector<int> s, vector<char> a, vector<unordered_map<char, vector<int>>> t_f, int i, vector<int> a_s) {
-            /*
-                States = {0, 1, 2}
-                Alphabet = {a, b}
-                transition func = { {a : {1}, b : {2}} , {a : {2}, b : {1}} , {a : {1}, b : {1}} }
-                init_state = 0
-                accept_states = {2}
-            */
+    // int curr = init_state;
 
-            states = s; 
-            alphabet = a; 
-            transition_func = t_f; 
-            init_state = i; 
-            accept_states = a_s; 
-        }
+    // for (auto c : str) {
+    //     unordered_map<char, set<int>> available = transition_func[curr];
+    //     if (available.find(c) == available.end()) {
+    //         return false;
+    //     }
+    //     curr = available[c][0]; // Should be a singleton at this point
+    // }
 
+    // if (find(accept_states.begin(), accept_states.end(), curr) != accept_states.end()) return true;
+    return false;
+}
 
-        bool process(string str) {
-            
-            // Check if DFA
-            // If DFA, process
-            // If not, peform conversion
-
-            // convert_to_dfa();
-
-            // int curr = init_state;
-        
-            for (auto c : str) {
-                unordered_map<char, vector<int>> available = transition_func[curr];
-                if (available.find(c) == available.end()) {
-                    return false;
-                }
-                curr = available[c][0]; // Should be a singleton at this point
+void FiniteAutomata::convert_to_dfa()
+{
+    unordered_map<int, set<int>> epsilon_closures;
+    for (int s = 0; s < transition_func.size(); s++)
+    {
+        epsilon_closures[s] = {s};
+        unordered_map<char, set<int>> ts = transition_func[s];
+        if (ts.find('\0') != ts.end())
+        {
+            for (int dest_state : transition_func[s]['\0'])
+            {
+                epsilon_closures[s].insert(dest_state);
             }
-        
-            // if (find(accept_states.begin(), accept_states.end(), curr) != accept_states.end()) return true; 
-            return false;
         }
+    }
+
+    // // Add all the epsilon closures to the first column of the transition_table
+    int x = epsilon_closures.size();
+    int y = alphabet.size();
+    vector<vector<set<int>>> transition_table(x, vector<set<int>>(y + 1));
+
+    // /*
+    //     Transition Table:
+    //      0      1    2
+    //    states   a    b
+    //    {1, 3}  {}   {}
+    //     {2}    {}   {}
+    //     {3}    {}   {}
+    // */
+
+    for (int i = 0; i < x; i++)
+    {
+        transition_table[i][0] = epsilon_closures[i];
+    }
 
 
-    private: 
+    for (int r = 0; r < transition_table.size(); r++)
+    {
+        set<int> lookup_states = transition_table[r][0];
+        for (int c = 1; c < y + 1; c++)
+        {
+            char character = alphabet[c-1];
+            for (auto s : lookup_states)
+            {
+                // If the character exists for this current state
+                if (transition_func[s].find(character) != transition_func[s].end())
+                {
+                    set<int> state_char_transitions = transition_func[s][character];
+                    for (auto dest_state : state_char_transitions)
+                    {
+                        transition_table[r][c].insert(dest_state);
+                        // Add any e's
+                        transition_table[r][c].insert(epsilon_closures[dest_state].begin(), epsilon_closures[dest_state].end());
+                    }
+                }
+            }
 
-        /*
+            if (!check_states(transition_table, transition_table[r][c])) {
+                vector<set<int>> new_row(y+1);
+                new_row[0] = transition_table[r][c];
+                transition_table.push_back(new_row);
+            }
 
-        CONVERT UNORDERED_MAP<pair<int, char>, int> to unordered_map<int, pair<char, int>>
-
-        */
-
-
-
-        // unordered_map<pair<int, char>, int> get_transition_tuples() {
-            /*
-                Convert transition function to a vector of (p, e, r)            
-            */
-            // unordered_map<pair<int, char>, int> nfa_transitions;
-
-            // for (int i = 0; i < transition_func.size(); i++) {
-            //     unordered_map<char, vector<int>> s = transition_func[i]; 
-            //     for (auto c : s) {
-            //         for (auto j : c.second) {
-            //             nfa_transitions[{i, c.first}] = j;
-            //         }
-            //     }
-            // } 
-            // unordered_map<pair<int, char>, int> x; 
-        //   return x;
-        // }    
-
-
-        void convert_to_dfa() {
-
-            // unordered_map<pair<int, char>, int> nfa_transitions = get_transition_tuples();
-            // unordered_map<pair<vector<int>, char>, set<int>> dfa_transitions = {};
-            // unordered_map<int, vector<int>> epsilon_closures = {};
-
-            // // Calculate epsilon closures
-            // for (auto s : states) {
-            //     epsilon_closures[s] = {s};
-            //     for (const auto& t : nfa_transitions) {
-            //         if (t.first.first == s && t.first.second == 'e') {
-            //             epsilon_closures[s].push_back(t.second);
-            //         } 
-            //     }
-            // } 
-
-            
-            // for (char character : alphabet) {
-
-            //     for (auto e : epsilon_closures) {
-                    
-            //         int curr_e_state = e.first; 
-            //         vector<int> curr_e_comb = e.second;
-            //         set<int> transitions_on_e = {};
-                    
-            //         for (auto s : curr_e_comb) { 
-                        
-            //             for (auto t : nfa_transitions) {
-                            
-            //                 pair<int, char> this_transition_state = t.first;
-
-            //                 if (this_transition_state.first == s && this_transition_state.second == character) {
-                                
-            //                     transitions_on_e.insert(t.second);
-
-            //                 }
-
-            //             }
-
-            //         } 
-
-            //         for (auto s : transitions_on_e) {
-
-            //             for (auto elem : epsilon_closures[s]) {
-
-            //                 transitions_on_e.insert(elem);
-
-            //             }
-            //         }
-
-            //         dfa_transitions[{curr_e_comb, character}] = transitions_on_e;
-            //     }
-            // }
-
-            // // adding states that are not covered by the epsilon closures
-            // // optimisation: just get rid of the tuples and go back to the dictionaries
-            // for (auto transition : dfa_transitions) {
-            //     if (find(dfa_transitions.begin(), dfa_transitions.end(), transition.second) == dfa_transitions.end()) {
-                    
-            //         vector<int> adding_state(transition.second.begin(), transition.second.end());
-                    
-            //         for (char character : alphabet) {
-
-            //             set<int> transitions_on_adding_state = {};
-
-            //             for (auto s : adding_state) {
-
-            //                 for (auto t : nfa_transitions) { 
-
-            //                     pair<int, char> this_transition_state = t.first;
-
-            //                     if (this_transition_state.first == s && this_transition_state.second == character) {
-                                    
-            //                         transitions_on_adding_state.insert(t.second);
-
-            //                     }
-
-            //                 }         
-
-            //             }                        
-
-            //             for (auto s : transitions_on_adding_state) {
-
-            //                 for (auto elem : epsilon_closures[s]) {
-
-            //                     transitions_on_adding_state.insert(elem);
-
-            //                 }
-
-            //             }
+        }
+    }
 
 
-            //             dfa_transitions[{adding_state, character}] = transitions_on_adding_state;
-            //         }
-            //     }    
-
-            //     printDFATransitions(dfa_transitions);
-
-            // }
-        }    
+    print_table(transition_table);
+}
 
 
-        // Helper function to print a vector<int>
-        // void printVector(const vector<int>& vec) {
-        //     cout << "[";
-        //     for (size_t i = 0; i < vec.size(); ++i) {
-        //         cout << vec[i];
-        //         if (i < vec.size() - 1) cout << ", ";
-        //     }
-        //     cout << "]";
-        // }
+void FiniteAutomata::print_table(vector<vector<set<int>>>& table) {
+    // Print column headers
+    std::cout << std::setw(10) << "State/Col";
+    for (size_t col = 0; col < table[0].size(); ++col) {
+        std::cout << std::setw(10) << "Col " + std::to_string(col);
+    }
+    std::cout << std::endl;
 
-        // // Helper function to print a set<int>
-        // void printSet(const set<int>& s) {
-        //     cout << "{";
-        //     for (auto it = s.begin(); it != s.end(); ++it) {
-        //         cout << *it;
-        //         if (next(it) != s.end()) cout << ", ";
-        //     }
-        //     cout << "}";
-        // }
+    std::cout << std::string(10 + table[0].size() * 10, '-') << std::endl;
 
-        // // Helper function to print a pair<vector<int>, char>
-        // void printPair(const pair<vector<int>, char>& p) {
-        //     cout << "(";
-        //     printVector(p.first);
-        //     cout << ", '" << p.second << "')";
-        // }
+    // Print rows with data
+    for (size_t i = 0; i < table.size(); ++i) {
+        std::cout << std::setw(10) << "Row " + std::to_string(i);
+        for (size_t j = 0; j < table[i].size(); ++j) {
+            std::cout << std::setw(10) << "{";
 
-        // // Function to print the unordered_map
-        // void printDFATransitions(const unordered_map<pair<vector<int>, char>, set<int>>& transitions) {
-        //     cout << "{\n";
-        //     for (const auto& entry : transitions) {
-        //         cout << "  ";
-        //         printPair(entry.first);
-        //         cout << " -> ";
-        //         printSet(entry.second);
-        //         cout << "\n";
-        //     }
-        //     cout << "}\n";
-        // }
-};
+            // Add elements of the set
+            for (auto it = table[i][j].begin(); it != table[i][j].end(); ++it) {
+                std::cout << *it;
+                if (std::next(it) != table[i][j].end()) {
+                    std::cout << ",";
+                }
+            }
+            std::cout << "}";
+        }
+        std::cout << std::endl;
+    }
+}
+
+bool FiniteAutomata::check_states(vector<vector<set<int>>> table, set<int> state) {
+
+    for (int r = 0; r < table.size(); r++) {
+        if (table[r][0] == state) {
+            return true;
+        }
+    }
+    return false;
+}
