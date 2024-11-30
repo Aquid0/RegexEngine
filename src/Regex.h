@@ -11,17 +11,16 @@
 
 using namespace std;
 
-class Regex {
-    public:
-        string regex;
-        vector<char> pfn;
-        Regex(string regex);
-        
+class Regex
+{
+public:
+    string regex;
+    vector<char> pfn;
+    Regex(string regex);
 
-    private:
-        void add_concatenation_ops();
-        void to_pfn();
-
+private:
+    void add_concatenation_ops();
+    void to_pfn();
 };
 
 #endif
