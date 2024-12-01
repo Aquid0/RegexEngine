@@ -1,4 +1,5 @@
-#include "FiniteAutomata.h"
+#include "../include/FiniteAutomata.h"
+
 #include <iostream>
 #include <vector>
 #include <unordered_map>
@@ -8,6 +9,7 @@
 #include <iomanip>
 
 using namespace std;
+FiniteAutomata::FiniteAutomata() : states(), alphabet(), transition_func(), init_state(), accept_states() {}
 
 FiniteAutomata::FiniteAutomata(vector<int> s, vector<char> a, vector<unordered_map<char, set<int>>> t_f, int i, vector<int> a_s) : states(s), alphabet(a), transition_func(t_f), init_state(i), accept_states(a_s)
 {

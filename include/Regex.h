@@ -1,6 +1,8 @@
 #ifndef REGEX_H
 #define REGEX_H
 
+#include "../include/FiniteAutomata.h"
+
 #include <iostream>
 #include <vector>
 #include <unordered_map>
@@ -8,19 +10,21 @@
 #include <algorithm>
 #include <set>
 #include <tuple>
-
-using namespace std;
+#include <queue>
 
 class Regex
 {
 public:
-    string regex;
-    vector<char> pfn;
-    Regex(string regex);
+    std::string regex;
+    std::queue<char> pfn;
+    FiniteAutomata nfa;
+    Regex(std:: string regex);
+    bool process(std:: string s);
 
 private:
     void add_concatenation_ops();
     void to_pfn();
+    void to_nfa();
 };
 
 #endif

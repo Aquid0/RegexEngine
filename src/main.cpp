@@ -1,6 +1,6 @@
 #include <iostream>
-#include "FiniteAutomata.h"
-#include "Regex.h"
+#include "../include/FiniteAutomata.h"
+#include "../include/Regex.h"
 #include <iostream>
 #include <vector>
 #include <unordered_map>
@@ -14,7 +14,8 @@ using namespace std;
 
 int main()
 {
-    Regex x("a(a+b)*b");
+    // Regex x("a(a+b)*b");
+    Regex x("ababab");
 }
 
 void test_nfa() {
